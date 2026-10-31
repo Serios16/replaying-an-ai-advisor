@@ -1,0 +1,44 @@
+{
+  "batch_request": {
+    "custom_id": "{NEUTRAL_ID}_p{PASS}",
+    "params": {
+      "model": "claude-opus-5-5",
+      "max_tokens": 16000,
+      "system": "<contents of labeller_system_prompt.txt, unchanged>",
+      "messages": [
+        {
+          "role": "user",
+          "content": "<reply>\n{REPLY_TEXT}\n</reply>"
+        }
+      ],
+      "output_config": {
+        "effort": "high",
+        "format": {
+          "type": "json_schema",
+          "schema": "<contents of labeller_schema.json, unchanged>"
+        }
+      }
+    }
+  },
+  "input_rendering": {
+    "REPLY_TEXT": "The reply's visible text blocks, in order, joined with a blank line. No thinking, no citations, no ID, no date, no role label.",
+    "choice_question": {
+      "rule": "A multiple-choice question stored as a tool call is rendered as text at its position in the reply, separated from the surrounding text by a blank line. Render every text the person saw, in display order. Do not render which option was chosen or anything the person typed.",
+      "format": "Question: {question}\nOptions:\n(1) {option 1}\n(2) {option 2}\n...",
+      "option_with_description": "(1) {label}: {description}",
+      "several_questions": "One block per question, in order, separated by a blank line.",
+      "multi_select": "If more than one option could be selected, use the line 'Options (more than one may be chosen):' in place of 'Options:'.",
+      "same_for_all": "Apply the same rendering to every reply in the pool that has such a question."
+    }
+  },
+  "batch_notes": {
+    "passes": "Two requests per reply, identical except for custom_id. No conversation history, no tools.",
+    "custom_id": "Must match ^[a-zA-Z0-9_-]{1,64}$ and be unique within the batch. The model does not see it.",
+    "results": "Results come back in any order: match on custom_id.",
+    "test_first": "Batch requests are validated only after the batch ends, and the batch docs do not name output_config. Send one synchronous request with these params before the first batch.",
+    "sampling": "Do not send temperature, top_p or top_k: this model rejects non-default values.",
+    "thinking": "Do not send a thinking field: adaptive thinking is always on for this model and cannot be disabled.",
+    "failed_call": "A result that is errored or expired, a stop_reason of 'refusal' or 'max_tokens', or JSON that fails the schema is a failed call. Resend it; do not record it as UNCLEAR.",
+    "enums": "Compare enum values case-insensitively."
+  }
+}

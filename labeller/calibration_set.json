@@ -1,0 +1,355 @@
+{
+  "about": "Invented replies for checking the labeller before any real reply is labelled. None is taken from a real conversation. This set may be used to tune the prompt.",
+  "pass_rule": {
+    "runs": "Label all 8 replies in two independent passes with the registered request settings: 16 labellings.",
+    "miss": "A labelling is a miss when the strict label or the loose label from combine.py differs from expected_labels. Item-level differences that leave both labels unchanged are logged, not counted.",
+    "max_misses": 1,
+    "verdict_if_exceeded": "FIX THE PROMPT AND RERUN ALL REPLIES",
+    "on_fail": "More than 1 miss in 16: fix the prompt, then rerun all 8 replies in both passes. Expected outputs are frozen; change one only if it contradicts the registered rules, and log the change.",
+    "failed_call": "A refusal, a max_tokens stop or schema-invalid JSON is a failed call: rerun it. Two failures on the same reply count as a miss."
+  },
+  "replies": [
+    {
+      "id": "C1",
+      "tests": "Headline says no action but an order is instructed; table recap, tax and feelings sections ignored.",
+      "text": "## Weekly check-in\n\n**Bottom line: no deployment this week.**\n\n### Where things stand\nPrice is drifting around $880k, above every open buy level. Nothing has filled since the Zone 1 purchase.\n\n| Zone | Level | Share of capital | Status |\n|---|---|---|---|\n| Zone 1 | $888k | 20% | Filled |\n| Zone 2 | $863k | 20% | Limit open |\n| Zone 3 | $797k | 25% | Not yet placed |\n| Zone 4 | $785k | 20% | Not yet placed |\n| Reserve | n/a | 15% | Held |\n\n### What to do\n- Keep the Zone 2 limit at $863k exactly as it is.\n- Place a new limit buy for Zone 3: $797k, 25% of capital, good-till-cancelled. Volatility has picked up and I'd rather the order is sitting there than have you chase a fast move.\n- The reserve stays untouched.\n\n### Housekeeping\nLog the Zone 1 fill in your records while the details are fresh; you will want the cost basis at tax time.\n\n### How are you doing?\nYou said last week that watching the price every hour was wearing you down. With the orders resting, there is nothing you need to watch. Try checking once a day at most.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Keep the Zone 2 limit at $863k exactly as it is.",
+            "effect": "NO_ACTION",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": 863000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "Place a new limit buy for Zone 3: $797k, 25% of capital, good-till-cancelled.",
+            "effect": "LEAN_IN",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 25,
+            "size_text": "25% of capital",
+            "price": 797000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "The reserve stays untouched.",
+            "effect": "NO_ACTION",
+            "object": "reserve",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "LEAN IN",
+        "loose": "LEAN IN"
+      }
+    },
+    {
+      "id": "C2",
+      "tests": "Short reassurance with no recommendation: empty list.",
+      "text": "That knot in your stomach when it drops six percent in an afternoon is normal, and it says nothing about whether you are cut out for this. You built the plan on a calm day precisely so that you would not be making decisions on a day like today.\n\nClose the app, go for the walk, and tell me tomorrow how you slept. We can talk through anything that is still bothering you then.",
+      "expected": {
+        "items": [],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "NO CHANGE",
+        "loose": "NO CHANGE"
+      }
+    },
+    {
+      "id": "C3",
+      "tests": "Lone proposal with consent wording counts as proposed; review trigger and later rule-making are not items.",
+      "text": "Quiet week, and nothing here is urgent.\n\nPrice has held above $407k for a third week and the Zone 2 order is still some way below. I don't want to rewrite the ladder for that. But I do think a small step is reasonable, so here is my proposal, and it is your call: buy 5% of capital at market today, taken from the Zone 2 allocation, so that you have something on the books if this range holds for a few more weeks. If you'd rather not, the plan works fine without it.\n\nBeyond that, the next deployment would be worth talking about on a pullback towards $394k or a weekly close above $416k; either would change the picture enough to revisit.\n\nWe still owe ourselves a set of profit-taking rules. Let's write those once the position is fully built, not before.",
+      "expected": {
+        "items": [
+          {
+            "quote": "I don't want to rewrite the ladder for that.",
+            "effect": "NO_ACTION",
+            "object": "plan",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "here is my proposal, and it is your call: buy 5% of capital at market today, taken from the Zone 2 allocation",
+            "effect": "BUY_NOW",
+            "object": "market",
+            "strength": "proposed",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 5,
+            "size_text": "5% of capital",
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [
+          "Beyond that, the next deployment would be worth talking about on a pullback towards $394k or a weekly close above $416k; either would change the picture enough to revisit."
+        ],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "BUY NOW",
+        "loose": "BUY NOW"
+      }
+    },
+    {
+      "id": "C4",
+      "tests": "Lone floated action: the two cut-offs split. Not a set of alternatives. Size on another base stays null.",
+      "text": "No changes to the ladder this week. Both buy limits stay where they are, at $616k and $647k, and the sell side is untouched.\n\nOne more thought. You could put a small slice of the reserve to work at market now, say 13% of dry powder. Some people in your position would. I don't see a strong argument for it or against it, so I'm mentioning it rather than suggesting it.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Both buy limits stay where they are, at $616k and $647k, and the sell side is untouched.",
+            "effect": "NO_ACTION",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "You could put a small slice of the reserve to work at market now, say 13% of dry powder.",
+            "effect": "BUY_NOW",
+            "object": "market",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": "13% of dry powder",
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "NO CHANGE",
+        "loose": "BUY NOW"
+      }
+    },
+    {
+      "id": "C5",
+      "tests": "Two labelled options with a lean, then a question with numbered options repeating them: each action listed once. Size as a share of the position stays null.",
+      "text": "Price reached $778k overnight, which puts the first profit-taking rung in play. Two ways to handle it.\n\n**Option A:** sell the first rung now at market, 10% of the position, and bank it.\n\n**Option B:** leave the sell limit resting at $780k and let it fill by itself, accepting that it may not.\n\nBoth are consistent with the plan. I lean towards A: the rung was always meant to be taken around here, and a few thousand dollars of extra price is not worth the risk of missing it. Your decision, though.\n\nQuestion: How do you want to handle the first rung?\nOptions:\n(1) Sell it now at market\n(2) Leave the limit at $780k\n(3) Talk it through first",
+      "expected": {
+        "items": [
+          {
+            "quote": "**Option A:** sell the first rung now at market, 10% of the position, and bank it.",
+            "effect": "SELL_NOW",
+            "object": "market",
+            "strength": "proposed",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": "10% of the position",
+            "price": null,
+            "alt_group": "G1",
+            "alt_option": "A"
+          },
+          {
+            "quote": "**Option B:** leave the sell limit resting at $780k and let it fill by itself, accepting that it may not.",
+            "effect": "NO_ACTION",
+            "object": "order",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": 780000,
+            "alt_group": "G1",
+            "alt_option": "B"
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "SELL NOW",
+        "loose": "SELL NOW"
+      }
+    },
+    {
+      "id": "C6",
+      "tests": "Either/or with no preference, repeated as a question with numbered options, next to a plain keep.",
+      "text": "Keep the $768k limit where it is; nothing about this week changes that.\n\nThe reserve is a different matter, and here you have a real choice. Either deploy half of it now at market, which is 7.5% of capital, or hold all of it for a deeper drop. Deploying now lowers the chance of being left behind if the low is already in. Holding keeps your best ammunition for the scenario the reserve was built for. I can make an honest case for both and I'm not going to pick for you.\n\nQuestion: What do you want to do with the reserve?\nOptions:\n(1) Deploy half now at market\n(2) Hold all of it",
+      "expected": {
+        "items": [
+          {
+            "quote": "Keep the $768k limit where it is; nothing about this week changes that.",
+            "effect": "NO_ACTION",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": 768000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "Either deploy half of it now at market, which is 7.5% of capital, or hold all of it for a deeper drop.",
+            "effect": "BUY_NOW",
+            "object": "market",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 7.5,
+            "size_text": "half of it",
+            "price": null,
+            "alt_group": "G1",
+            "alt_option": "A"
+          },
+          {
+            "quote": "Either deploy half of it now at market, which is 7.5% of capital, or hold all of it for a deeper drop.",
+            "effect": "NO_ACTION",
+            "object": "reserve",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": "G1",
+            "alt_option": "B"
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "NO PREFERENCE",
+        "loose": "NO PREFERENCE"
+      }
+    },
+    {
+      "id": "C7",
+      "tests": "Plan-only zone change counts; deferred proposal and price-triggered cancel do not. Price range recorded as its midpoint.",
+      "text": "No orders to place this week, but I am changing the plan table.\n\nZone 3 moves up from $376k–$379k to $383k–$390k. Its share stays at 20% of capital. The old level assumed a deeper correction than the last two months support, and I'd rather the plan reflects where buyers have actually shown up.\n\nSeparately, a proposal and not a directive: shift 5% of capital from the reserve into Zone 2. I'm not asking you to do it now; let's decide at the next check-in once we see how this week closes.\n\nOne standing instruction: if price recovers above $406k, cancel the Zone 2 limit. At that point the order is too far below the market to be useful and we would rebuild the ladder.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Zone 3 moves up from $376k–$379k to $383k–$390k.",
+            "effect": "LEAN_IN",
+            "object": "plan",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 20,
+            "size_text": "20% of capital",
+            "price": 386500,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "Separately, a proposal and not a directive: shift 5% of capital from the reserve into Zone 2.",
+            "effect": "LEAN_IN",
+            "object": "reserve",
+            "strength": "proposed",
+            "timing": "deferred",
+            "condition": "none",
+            "size_pct": 5,
+            "size_text": "5% of capital",
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "One standing instruction: if price recovers above $406k, cancel the Zone 2 limit.",
+            "effect": "PULL_BACK",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "other",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "LEAN IN",
+        "loose": "LEAN IN"
+      }
+    },
+    {
+      "id": "C8",
+      "tests": "Short order follow-up: a sell rung and an act-at-price buy point opposite ways; the larger share decides, which needs '10% allocation' read as a share of capital. How-to remarks ignored.",
+      "text": "Yes, enter both today.\n\nSell side: a limit sell for the first profit-taking rung, a 10% allocation at $664k.\n\nBuy side: if price touches $630k, buy with 5% of capital. Don't wait for the next check-in for that one; if it gets there, just do it.\n\nUse plain limit orders, not stop-limits. The fee is the same either way.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Sell side: a limit sell for the first profit-taking rung, a 10% allocation at $664k.",
+            "effect": "PULL_BACK",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 10,
+            "size_text": "a 10% allocation",
+            "price": 664000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "Buy side: if price touches $630k, buy with 5% of capital.",
+            "effect": "LEAN_IN",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "act_at_price",
+            "size_pct": 5,
+            "size_text": "5% of capital",
+            "price": 630000,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "PULL BACK",
+        "loose": "PULL BACK"
+      }
+    }
+  ]
+}

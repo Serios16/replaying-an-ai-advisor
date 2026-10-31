@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "quote": {
+            "type": "string",
+            "description": "The sentence, bullet or table row stating the action, copied exactly from the reply."
+          },
+          "effect": {
+            "type": "string",
+            "enum": ["BUY_NOW", "SELL_NOW", "LEAN_IN", "PULL_BACK", "NO_ACTION"]
+          },
+          "object": {
+            "type": "string",
+            "enum": ["market", "order", "reserve", "plan", "none"]
+          },
+          "strength": {
+            "type": "string",
+            "enum": ["directive", "proposed", "floated"]
+          },
+          "timing": {
+            "type": "string",
+            "enum": ["now", "deferred"]
+          },
+          "condition": {
+            "type": "string",
+            "enum": ["none", "act_at_price", "other"]
+          },
+          "size_pct": {
+            "type": ["number", "null"],
+            "description": "Share of total capital in percentage points, or null."
+          },
+          "size_text": {
+            "type": ["string", "null"],
+            "description": "The size as the reply words it, or null."
+          },
+          "price": {
+            "type": ["number", "null"],
+            "description": "Plain number, no currency symbol or separators, or null."
+          },
+          "alt_group": {
+            "type": ["string", "null"],
+            "description": "G1, G2, ... for items in a set of alternatives; otherwise null."
+          },
+          "alt_option": {
+            "type": ["string", "null"],
+            "description": "A, B, ... for the alternative the item belongs to; otherwise null."
+          }
+        },
+        "required": [
+          "quote", "effect", "object", "strength", "timing", "condition",
+          "size_pct", "size_text", "price", "alt_group", "alt_option"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "review_triggers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Sentences copied exactly that say what would prompt the next move or review without telling the person to act."
+    },
+    "unclear_note": {
+      "type": ["string", "null"],
+      "description": "Null unless a recommendation cannot be fitted into the fields at all; then one sentence describing the problem."
+    }
+  },
+  "required": ["items", "review_triggers", "unclear_note"],
+  "additionalProperties": false
+}

@@ -1,0 +1,317 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scoring manifest for score.py",
+  "description": "One row per reply in the labelling pool. score.py does its own validation; this schema documents the same shape.",
+  "type": "object",
+  "required": [
+    "run",
+    "replies"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "run": {
+      "type": "object",
+      "required": [
+        "weeks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Free text, e.g. 'A: Sonnet 4.6 on NEW #10-#19'."
+        },
+        "weeks": {
+          "type": "array",
+          "description": "The numbered check-ins this run scores, e.g. [10,11,...,19].",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "samples_per_week": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5,
+          "description": "Replays planned per week. Every week needs one replay row for each sample number from 1 to this value."
+        },
+        "stage": {
+          "enum": [
+            "A",
+            "extension"
+          ],
+          "default": "A",
+          "description": "A: the first run. extension: the first run's weeks and the added weeks scored together in one manifest; a verdict of 'more weeks' at this stage is final and reads INCONCLUSIVE."
+        }
+      }
+    },
+    "replies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reply"
+      }
+    }
+  },
+  "$defs": {
+    "label": {
+      "enum": [
+        "BUY NOW",
+        "SELL NOW",
+        "LEAN IN",
+        "PULL BACK",
+        "NO CHANGE",
+        "NO PREFERENCE",
+        "UNCLEAR"
+      ]
+    },
+    "cutoff": {
+      "type": "object",
+      "description": "The fields of combine.py's combine(output, cutoff) for this pass.",
+      "required": [
+        "label",
+        "tie_break",
+        "unclear_reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "tie_break": {
+          "enum": [
+            null,
+            "resolved",
+            "unresolved"
+          ]
+        },
+        "unclear_reason": {
+          "enum": [
+            null,
+            "note",
+            "tie-break"
+          ]
+        }
+      }
+    },
+    "pass": {
+      "type": "object",
+      "required": [
+        "pass",
+        "n_items",
+        "strict",
+        "loose"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pass": {
+          "enum": [
+            1,
+            2,
+            3
+          ],
+          "description": "1 and 2 are the two independent passes; 3 is the pass added after a disagreement."
+        },
+        "n_items": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of items the labeller listed for this reply in this pass: len(output['items'])."
+        },
+        "strict": {
+          "$ref": "#/$defs/cutoff"
+        },
+        "loose": {
+          "$ref": "#/$defs/cutoff"
+        }
+      }
+    },
+    "reply": {
+      "type": "object",
+      "required": [
+        "reply_id",
+        "kind",
+        "chat",
+        "date"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "reply_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique. The neutral ID used in the labelling pool is fine."
+        },
+        "kind": {
+          "enum": [
+            "original",
+            "replay",
+            "interim",
+            "framework",
+            "old9",
+            "yardstick_old",
+            "yardstick_new"
+          ],
+          "description": "original: an advisor check-in reply (scored if its week is in run.weeks, otherwise context). Every scored week needs a check-in row for the week before it. replay: one replay sample. interim: any other advisor reply on the live branch. framework: the reply to the framework prompt. old9: OLD #9. yardstick_old: OLD #10-#13. yardstick_new: only for a NEW check-in that has no 'original' row in this manifest."
+        },
+        "week": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Numbered check-in. Required for original, replay, old9 and yardstick rows; null for interim and framework."
+        },
+        "chat": {
+          "enum": [
+            "OLD",
+            "NEW"
+          ]
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}",
+          "description": "Date of the reply (for a replay, of the check-in it replays). Anything after the first ten characters is ignored."
+        },
+        "position": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Message index of the reply in its chat. Required for original, interim, framework and old9; it orders the history for rule (b)."
+        },
+        "sample": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "description": "Sample number, required for replays: 1 to run.samples_per_week, each exactly once per week."
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "failed"
+          ],
+          "default": "ok",
+          "description": "failed: a replay sample still invalid after the resend cap. It has no passes and does not count as a valid sample, but its row must be present."
+        },
+        "passes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pass"
+          },
+          "maxItems": 3
+        },
+        "attempts": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Required for replays: how many tries this sample took (the first try plus at most two resends). The kept reply is the first valid try. Whether a try is valid never depends on what the reply recommends."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "failed"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "replay"
+              }
+            }
+          },
+          "else": {
+            "required": [
+              "passes"
+            ],
+            "properties": {
+              "passes": {
+                "minItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "original",
+                  "replay",
+                  "old9",
+                  "yardstick_old",
+                  "yardstick_new"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "week"
+            ],
+            "properties": {
+              "week": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "original",
+                  "interim",
+                  "framework",
+                  "old9"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "position"
+            ],
+            "properties": {
+              "position": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "replay"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "sample",
+              "attempts"
+            ],
+            "properties": {
+              "sample": {
+                "type": "integer"
+              },
+              "attempts": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

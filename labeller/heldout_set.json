@@ -1,0 +1,194 @@
+{
+  "about": "Invented held-out replies, frozen with the prompt. Never used to tune the prompt. None is taken from a real conversation.",
+  "pass_rule": {
+    "runs": "After the calibration set passes, label all 4 replies in two independent passes with the registered request settings: 8 labellings. Run once.",
+    "miss": "As for the calibration set: the strict label or the loose label differs from expected_labels.",
+    "max_misses": 1,
+    "verdict_if_exceeded": "REPORT, AND DO NOT LABEL REAL REPLIES UNTIL YOU HAVE DECIDED WHAT TO DO",
+    "on_fail": "Misses are reported separately from calibration misses and are never fixed by editing the prompt against these replies. If the prompt is changed for any reason after this set has been run, the set is spent: write new held-out replies.",
+    "failed_call": "A refusal, a max_tokens stop or schema-invalid JSON is a failed call: rerun it. Two failures on the same reply count as a miss."
+  },
+  "replies": [
+    {
+      "id": "H1",
+      "tests": "Actions appear only in a question with numbered options; the reply leaves the choice open; one option is not an action.",
+      "text": "**Check-in**\n\nPrice is at $516.4K, up 6.9% on the week. The Zone 2 limit in the $471K–$483K band did not fill.\n\nNothing in this week's data changes the plan. There is one open question, and it is a matter of temperament more than analysis: whether to get some exposure now instead of waiting for the zone. I can argue it either way, so I would like you to choose.\n\nQuestion: What do you want to do with the Zone 2 money?\nOptions:\n(1) Buy a quarter of it at market today (5% of capital)\n(2) Raise the Zone 2 limit to $507K–$511K\n(3) Leave everything as it is\n(4) I'd like to think about it",
+      "expected": {
+        "items": [
+          {
+            "quote": "(1) Buy a quarter of it at market today (5% of capital)",
+            "effect": "BUY_NOW",
+            "object": "market",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 5,
+            "size_text": "a quarter of it",
+            "price": null,
+            "alt_group": "G1",
+            "alt_option": "A"
+          },
+          {
+            "quote": "(2) Raise the Zone 2 limit to $507K–$511K",
+            "effect": "LEAN_IN",
+            "object": "order",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": 509000,
+            "alt_group": "G1",
+            "alt_option": "B"
+          },
+          {
+            "quote": "(3) Leave everything as it is",
+            "effect": "NO_ACTION",
+            "object": "none",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": "G1",
+            "alt_option": "C"
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "NO PREFERENCE",
+        "loose": "NO PREFERENCE"
+      }
+    },
+    {
+      "id": "H2",
+      "tests": "Proposed order sized as a share of dry powder (null) beside a floated cancel sized in capital: strict counts only the order; loose has opposing directions and a missing size.",
+      "text": "Short answer: yes, I think the order is worth placing, if you're comfortable with it. Set the buy limit in the $448K–$454K band and fund it with 20% of your dry powder. That keeps most of your ammunition back while still getting you a real position if the band is reached.\n\nOne other thing you could look at is cancelling the Zone 4 buy order (10% of capital) to simplify the book. I have no strong feeling about it; it's there if the clutter bothers you.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Set the buy limit in the $448K–$454K band and fund it with 20% of your dry powder.",
+            "effect": "LEAN_IN",
+            "object": "order",
+            "strength": "proposed",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": "20% of your dry powder",
+            "price": 451000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "One other thing you could look at is cancelling the Zone 4 buy order (10% of capital) to simplify the book.",
+            "effect": "PULL_BACK",
+            "object": "order",
+            "strength": "floated",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": 10,
+            "size_text": "10% of capital",
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "LEAN IN",
+        "loose": "UNCLEAR"
+      }
+    },
+    {
+      "id": "H3",
+      "tests": "Long selling-phase check-in: a market sale outranks a sell limit moved up; ranges, table recap, review trigger, tax and feelings.",
+      "text": "## Check-in: first target reached\n\n**Summary: take the first rung today.**\n\n| Rung | Level | Size | Status |\n|---|---|---|---|\n| 1 | $777K–$781K | 25% of the position | Level reached |\n| 2 | $806K–$812K | 25% of the position | Order resting |\n| 3 | $822K+ | to be decided | Not set |\n\n### Actions\n1. Sell rung 1 at market today: 25% of the position. Price is inside the band and the plan says we take it without haggling.\n2. Move the rung 2 sell limit up from $806K–$812K to $810K–$820K. Momentum is stronger than when we set it, and I'd rather give it room.\n3. Nothing to do on the buy side.\n\nWhat would make me revisit rung 3 is a weekly close above $855K, or a drop back under $769K; we would talk before doing anything.\n\n### Records\nNote the sale price for your tax file.\n\n### And you?\nA first sale after months of buying can feel like betraying the plan. It is the plan. Tell me how it sits with you.",
+      "expected": {
+        "items": [
+          {
+            "quote": "1. Sell rung 1 at market today: 25% of the position.",
+            "effect": "SELL_NOW",
+            "object": "market",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": "25% of the position",
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "2. Move the rung 2 sell limit up from $806K–$812K to $810K–$820K.",
+            "effect": "LEAN_IN",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": "25% of the position",
+            "price": 815000,
+            "alt_group": null,
+            "alt_option": null
+          },
+          {
+            "quote": "3. Nothing to do on the buy side.",
+            "effect": "NO_ACTION",
+            "object": "none",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [
+          "What would make me revisit rung 3 is a weekly close above $855K, or a drop back under $769K; we would talk before doing anything."
+        ],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "SELL NOW",
+        "loose": "SELL NOW"
+      }
+    },
+    {
+      "id": "H4",
+      "tests": "Short reassurance with a keep and a price that prompts a conversation, not an action.",
+      "text": "I hear you, and I'm glad you wrote instead of clicking buttons.\n\nTwo things can be true: the drop feels awful, and nothing about it calls for action today. Hands off the orders for now. If it keeps sliding and tags $580K, don't do anything on your own; message me and we'll decide together whether the reserve comes into play. That conversation is for then, not for tonight.\n\nGo and do something that has nothing to do with screens. I'll be here tomorrow.",
+      "expected": {
+        "items": [
+          {
+            "quote": "Hands off the orders for now.",
+            "effect": "NO_ACTION",
+            "object": "order",
+            "strength": "directive",
+            "timing": "now",
+            "condition": "none",
+            "size_pct": null,
+            "size_text": null,
+            "price": null,
+            "alt_group": null,
+            "alt_option": null
+          }
+        ],
+        "review_triggers": [
+          "If it keeps sliding and tags $580K, don't do anything on your own; message me and we'll decide together whether the reserve comes into play."
+        ],
+        "unclear_note": null
+      },
+      "expected_labels": {
+        "strict": "NO CHANGE",
+        "loose": "NO CHANGE"
+      }
+    }
+  ]
+}
